@@ -32,40 +32,6 @@ use RuntimeException;
  * required.
  *
  * @see \Cake\Collection\CollectionInterface For a full description of the collection methods supported by this class
- * @method \Cake\Collection\CollectionInterface each(callable $c) Passes each of the query results to the callable
- * @method \Cake\Collection\CollectionInterface sortBy($callback, $dir = SORT_DESC, $type = \SORT_NUMERIC) Sorts the query with the callback
- * @method \Cake\Collection\CollectionInterface filter(callable $c = null) Keeps the results using passing the callable test
- * @method \Cake\Collection\CollectionInterface reject(callable $c) Removes the results passing the callable test
- * @method bool every(callable $c) Returns true if all the results pass the callable test
- * @method bool some(callable $c) Returns true if at least one of the results pass the callable test
- * @method \Cake\Collection\CollectionInterface map(callable $c) Modifies each of the results using the callable
- * @method mixed reduce(callable $c, $zero = null) Folds all the results into a single value using the callable.
- * @method \Cake\Collection\CollectionInterface extract($field) Extracts a single column from each row
- * @method mixed max($field, $type = SORT_NUMERIC) Returns the maximum value for a single column in all the results.
- * @method mixed min($field, $type = SORT_NUMERIC) Returns the minimum value for a single column in all the results.
- * @method \Cake\Collection\CollectionInterface groupBy(string|callable $callable) In-memory group all results by the value of a column.
- * @method \Cake\Collection\CollectionInterface indexBy(string|callable $callable) Returns the results indexed by the value of a column.
- * @method \Cake\Collection\CollectionInterface countBy(string|callable $callable) Returns the number of unique values for a column
- * @method float sumOf(string|callable $field) Returns the sum of all values for a single column
- * @method \Cake\Collection\CollectionInterface shuffle() In-memory randomize the order the results are returned
- * @method \Cake\Collection\CollectionInterface sample($size = 10) In-memory shuffle the results and return a subset of them.
- * @method \Cake\Collection\CollectionInterface take($size = 1, $from = 0) In-memory limit and offset for the query results.
- * @method \Cake\Collection\CollectionInterface skip(int $howMany) Skips some rows from the start of the query result.
- * @method mixed last() Return the last row of the query result
- * @method \Cake\Collection\CollectionInterface append(array|\Traversable $items) Appends more rows to the result of the query.
- * @method \Cake\Collection\CollectionInterface combine($k, $v, $g = null) Returns the values of the column $v index by column $k,
- *   and grouped by $g.
- * @method \Cake\Collection\CollectionInterface nest($k, $p, $n = 'children') Creates a tree structure by nesting the values of column $p into that
- *   with the same value for $k using $n as the nesting key.
- * @method array toArray() Returns a key-value array with the results of this query.
- * @method array toList() Returns a numerically indexed array with the results of this query.
- * @method \Cake\Collection\CollectionInterface stopWhen(callable $c) Returns each row until the callable returns true.
- * @method \Cake\Collection\CollectionInterface zip(array|\Traversable $c) Returns the first result of both the query and $c in an array,
- *   then the second results and so on.
- * @method \Cake\Collection\CollectionInterface zipWith($collections, callable $callable) Returns each of the results out of calling $c
- *   with the first rows of the query and each of the items, then the second rows and so on.
- * @method \Cake\Collection\CollectionInterface chunk($size) Groups the results in arrays of $size rows each.
- * @method bool isEmpty() Returns true if this query found no results.
  */
 class Query extends DatabaseQuery implements JsonSerializable, QueryInterface
 {
@@ -1311,12 +1277,596 @@ class Query extends DatabaseQuery implements JsonSerializable, QueryInterface
     }
 
     /**
+     * Passes each of the query results to the callable
+     *
+     * @param callable $c
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function each(callable $c)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "each" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->each($c);
+    }
+
+    /**
+     * Sorts the query with the callback
+     *
+     * @param $callback
+     * @param int $dir
+     * @param int $type
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function sortBy($callback, $dir = SORT_DESC, $type = \SORT_NUMERIC)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "sortBy" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->sortBy($callback, $dir, $type);
+    }
+
+    /**
+     * Keeps the results using passing the callable test
+     *
+     * @param callable|null $c
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function filter(callable $c = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "filter" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->filter($c);
+    }
+
+    /**
+     * Removes the results passing the callable test
+     *
+     * @param callable $c
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function reject(callable $c)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "reject" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->reject($c);
+    }
+
+    /**
+     * Modifies each of the results using the callable
+     *
+     * @param callable $c
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function map(callable $c = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "map" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->map($c);
+    }
+
+    /**
+     * Extracts a single column from each row
+     *
+     * @param $field
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function extract($field)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "extract" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->extract($field);
+    }
+
+    /**
+     * Returns each row until the callable returns true.
+     *
+     * @param callable $c
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function stopWhen(callable $c)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "stopWhen" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->stopWhen($c);
+    }
+
+    /**
+     * Returns the first result of both the query and $c in an array, then the second results and so on.
+     *
+     * @param array|\Traversable $c
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function zip($c)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "zip" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->zip($c);
+    }
+
+    /**
+     * Returns each of the results out of calling $c with the first rows of the query and each of the items,
+     * then the second rows and so on.
+     *
+     * @param $collections
+     * @param callable $callable
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function zipWith($collections, callable $callable)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "zipWith" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->zipWith($collections, $callable);
+    }
+
+    /**
+     * In-memory group all results by the value of a column.
+     *
+     * @param string|callable $callable
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function groupBy($callable)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "groupBy" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->groupBy($callable);
+    }
+
+    /**
+     * Returns the results indexed by the value of a column.
+     *
+     * @param string|callable $callable
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function indexBy($callable)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "indexBy" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->indexBy($callable);
+    }
+
+    /**
+     * Returns the number of unique values for a column
+     *
+     * @param string|callable $callable
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function countBy($callable)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "countBy" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->countBy($callable);
+    }
+
+    /**
+     * Groups the results in arrays of $size rows each.
+     *
+     * @param $size
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function chunk($size)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "chunk" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->chunk($size);
+    }
+
+    /**
+     * In-memory randomize the order the results are returned
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function shuffle($callable)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "shuffle" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->shuffle($callable);
+    }
+
+    /**
+     * In-memory shuffle the results and return a subset of them.
+     *
+     * @param int $size
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function sample($size = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "sample" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->sample($size);
+    }
+
+    /**
+     * In-memory limit and offset for the query results.
+     *
+     * @param int $size
+     * @param int $from
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function take($size = null, $from = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "take" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->take($size, $from);
+    }
+
+    /**
+     * Skips some rows from the start of the query result.
+     *
+     * @param int $howMany
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function skip($howMany)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "skip" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->skip($howMany);
+    }
+
+    /**
+     * Appends more rows to the result of the query.
+     *
+     * @param array|\Traversable $items
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function append($items)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "append" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->append($items);
+    }
+
+    /**
+     * Returns the values of the column $v index by column $k, and grouped by $g.
+     *
+     * @param $k
+     * @param $v
+     * @param $g
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function combine($k, $v, $g = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "combine" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->combine($k, $v, $g);
+    }
+
+    /**
+     * Creates a tree structure by nesting the values of column $p into that
+     * with the same value for $k using $n as the nesting key.
+     *
+     * @param $k
+     * @param $p
+     * @param $n
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function nest($k, $p, $n = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "nest" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->nest($k, $p, $n);
+    }
+
+    /**
+     * Returns true if all the results pass the callable test
+     *
+     * @param callable $c
+     *
+     * @return bool
+     */
+    public function every(callable $c)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "every" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->every($c);
+    }
+
+    /**
+     * Returns true if at least one of the results pass the callable test
+     *
+     * @param callable $c
+     *
+     * @return bool
+     */
+    public function some(callable $c)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "some" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->some($c);
+    }
+
+    /**
+     * Folds all the results into a single value using the callable.
+     *
+     * @param callable $c
+     * @param null $zero
+     *
+     * @return mixed
+     */
+    public function reduce(callable $c, $zero = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "reduce" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->reduce($c, $zero);
+    }
+
+    /**
+     * Returns the maximum value for a single column in all the results.
+     *
+     * @param $field
+     * @param $type
+     *
+     * @return mixed
+     */
+    public function max($field, $type = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "max" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->max($field, $type);
+    }
+
+    /**
+     * Returns the minimum value for a single column in all the results.
+     *
+     * @param $field
+     * @param $type
+     *
+     * @return mixed
+     */
+    public function min($field, $type = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "min" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->min($field, $type);
+    }
+
+    /**
+     * Returns the sum of all values for a single column
+     *
+     * @param string|callable $field
+     *
+     * @return float|int
+     */
+    public function sumOf($field)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "sumOf" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->sumOf($field);
+    }
+
+    /**
+     * Return the last row of the query result
+     *
+     * @return mixed
+     */
+    public function last()
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "last" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->last();
+    }
+
+    /**
+     * Returns a key-value array with the results of this query.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "toArray" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->toArray();
+    }
+
+    /**
+     * Returns a numerically indexed array with the results of this query.
+     *
+     * @return array
+     */
+    public function toList()
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "toList" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->toList();
+    }
+
+    /**
+     * Returns true if this query found no results.
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "isEmpty" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->isEmpty();
+    }
+
+    /**
+     * Returns true if value is present in this query.
+     *
+     * @param $value
+     *
+     * @return bool
+     */
+    public function contains($value)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "contains" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->contains($value);
+    }
+
+    /**
+     * Returns true if value is present in this query.
+     *
+     * @param $preserveKeys
+     *
+     * @return \Cake\Collection\CollectionInterface
+     */
+    public function compile($preserveKeys = null)
+    {
+        if ($this->type() !== 'select') {
+            throw new \BadMethodCallException(
+                sprintf('Cannot call method "compile" on a "%s" query', $this->type())
+            );
+        }
+
+        return $this->all()->compile($preserveKeys);
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @throws \BadMethodCallException if the method is called for a non-select query
      */
     public function __call($method, $arguments)
     {
+        deprecationWarning(
+            'Using Query::_call($method, $arguments) is deprecated. ' .
+            'Use correct method instead.'
+        );
+
         if ($this->type() === 'select') {
             return $this->_call($method, $arguments);
         }

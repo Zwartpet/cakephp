@@ -1875,11 +1875,11 @@ class QueryTest extends TestCase
             ->will($this->returnValue($resultSet));
         $resultSet->expects($this->once())
             ->method($method)
-            ->with($arg, 'extra')
+            ->with($arg)
             ->will($this->returnValue(new \Cake\Collection\Collection([])));
         $this->assertInstanceOf(
             '\Cake\Collection\Collection',
-            $query->{$method}($arg, 'extra')
+            $query->{$method}($arg)
         );
     }
 
@@ -1891,9 +1891,11 @@ class QueryTest extends TestCase
      */
     public function testCollectionProxyBadMethod()
     {
-        $this->expectException(\BadMethodCallException::class);
-        $this->expectExceptionMessage('Unknown method "derpFilter"');
-        $this->getTableLocator()->get('articles')->find('all')->derpFilter();
+        $this->deprecated(function () {
+            $this->expectException(\BadMethodCallException::class);
+            $this->expectExceptionMessage('Unknown method "derpFilter"');
+            $this->getTableLocator()->get('articles')->find('all')->derpFilter();
+        });
     }
 
     /**
@@ -3696,5 +3698,47 @@ class QueryTest extends TestCase
             $table
                 ->find()
                 ->selectAllExcept([], ['body']);
+    }
+
+    /**
+     * Test that the each method passes the query result to the callback
+     *
+     * @return void
+     */
+    public function testEachCollectionMethod()
+    {
+        $table = $this->getTableLocator()->get('Articles');
+
+        $result = $table
+            ->find()
+            ->where(['published' => 'Y'])
+            ->each(function ($article) {
+                $article['published'] = 'N';
+            })
+            ->toArray();
+
+        $this->assertEquals('N', $result[0]->published);
+        $this->assertEquals('N', $result[1]->published);
+        $this->assertEquals('N', $result[2]->published);
+    }
+
+    /**
+     * Test that the filter method passes the query result to the callback
+     *
+     * @return void
+     */
+    public function testFilterCollectionMethod()
+    {
+        $table = $this->getTableLocator()->get('Articles');
+
+        $result = $table
+            ->find()
+            ->where(['published' => 'Y'])
+            ->filter(function ($article) {
+                return $article->id !== 3;
+            })
+            ->toArray();
+
+        $this->assertCount(2, $result);
     }
 }
